@@ -1,7 +1,15 @@
 package com.example.pokedex.entities;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Pokemon {
     private static final long serialVersionUID = 669636611022282531L;
 
@@ -10,15 +18,6 @@ public class Pokemon {
     private String name;
     private int height;
     private int base_stat;
-
-    public Pokemon() {  }
-
-    public Pokemon(int id, String name, int height, int base_stat) {
-        this.id = id;
-        this.name = name;
-        this.height = height;
-        this.base_stat = base_stat;
-    }
 
 
 }
