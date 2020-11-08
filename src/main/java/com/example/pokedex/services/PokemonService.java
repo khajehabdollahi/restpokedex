@@ -55,19 +55,19 @@ public class PokemonService {
         return pokemonRepository.save(pokemon);
     }
 
-    @CachePut(value = "movieCache", key = "#id")
+    @CachePut(value = "pokemoneCache", key = "#id")
     public void update(String id, Pokemon pokemon) {
         if(!pokemonRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunde ej hitta filmen");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunde ej hitta pokemon");
         }
         pokemon.setId(id);
         pokemonRepository.save(pokemon);
     }
 
-    @CacheEvict(value = "movieCache", allEntries = true)
+    @CacheEvict(value = "pokemoneCache", allEntries = true)
     public void delete(String id) {
         if(!pokemonRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunde ej hitta filmen");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunde ej hitta pokemon");
         }
         pokemonRepository.deleteById(id);
     }
