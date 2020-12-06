@@ -6,9 +6,6 @@ import com.example.pokedex.repository.PokemonRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,58 +13,70 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class PokemonService {
     @Autowired
-    private final PokemonRepository pokemonRepository;
+    private PokemonRepository pokemonRepository;
     @Autowired
-    private final PokemonConsumerService pokemonConsumerService;
-    @Autowired
-    private final PokemonMapper pokemonMapper;
+    private PokemonConsumerService pokemonConsumerService;
 
+    private PokemonMapper pokemonMapper;
 
-    public List<Pokemon> findAll(String title) {
-        var pokemons = pokemonRepository.findAll();
-        pokemons = pokemons.stream()
-                .filter(movie -> movie.getTitle().toLowerCase().contains(title.toLowerCase()))
+    public List<Pokemon> findAll(String name, int height) {
+        var all_pokemons = pokemonRepository.findAll();
+        if (name!=null) searchPokemonByName(name, all_pokemons);
+        if (height>0) searchPokemonByHeight(height, all_pokemons);
+        return all_pokemons;
+    }
+
+    private List<Pokemon> searchPokemonByName(String name, List<Pokemon> pokemons){
+        var allpokemons = pokemonRepository.findAll();
+        allpokemons = allpokemons.stream()
+                .filter(pokemon -> pokemon.getName().toLowerCase().contains(name.toLowerCase()))
                 .collect(Collectors.toList());
         if(pokemons.isEmpty()) {
-            var pokemonDto = pokemonConsumerService.search(title);
+            var pokemonDto = pokemonConsumerService.searchPokemon(name);
             if(pokemonDto != null) {
-                /*var movie = new Movie(moviesDto.getTitle(), moviesDto.getPlot(), moviesDto.getLanguage(),
-                        moviesDto.getCountry(), moviesDto.getYear(), moviesDto.getImdbID(), List.of(moviesDto.getActors()));*/
-                var pokemon = pokemonMapper.movieDtoToMovie(pokemonDto);
+                var pokemon = new Pokemon(pokemonDto.getId(), pokemonDto.getName(), pokemonDto.getHeight(), pokemonDto.getBase_stat());
                 pokemons.add(this.save(pokemon));
             }
         }
         return pokemons;
     }
 
+    private List<Pokemon> searchPokemonByHeight(Integer height, List<Pokemon> pokemons){
+        pokemons = pokemons.stream()
+                .filter(pokemon -> pokemon.getHeight()==height)
+                .collect(Collectors.toList());
+        if(pokemons.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunde ej hitta pokemonen med den weight");
+        }
+        return pokemons;
+    }
+
     public Pokemon findById(String id) {
         return pokemonRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunde ej hitta filmen"));
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunde ej hitta pokemonen"));
     }
 
-    @CachePut(value = "pokemoneCache", key = "#result.id")
-    public Pokemon save(Pokemon pokemon) {
-        return pokemonRepository.save(pokemon);
+    public Pokemon save(Pokemon movie) {
+        return pokemonRepository.save(movie);
     }
 
-    @CachePut(value = "pokemoneCache", key = "#id")
     public void update(String id, Pokemon pokemon) {
         if(!pokemonRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunde ej hitta pokemon");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunde ej hitta pokemonen");
         }
         pokemon.setId(id);
         pokemonRepository.save(pokemon);
     }
 
-    @CacheEvict(value = "pokemoneCache", allEntries = true)
     public void delete(String id) {
         if(!pokemonRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunde ej hitta pokemon");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunde ej hitta pokemonen");
         }
         pokemonRepository.deleteById(id);
     }
