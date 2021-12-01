@@ -1,6 +1,6 @@
 package com.example.pokedex.services;
 
-import com.example.pokedex.dto.PokemonDto;
+import com.example.pokedex.entities.Pokemon;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,9 +16,9 @@ public class PokemonConsumerService {
         this.restTemplate = restTemplateBuilder.build();
     }
 
-    public PokemonDto searchPokemon(String name) {
+    public Pokemon searchPokemon(String name) {
         var urlWithTitleQuery = url + name;
-        var pokemon = restTemplate.getForObject(urlWithTitleQuery, PokemonDto.class);
+        var pokemon = restTemplate.getForObject(urlWithTitleQuery, Pokemon.class);
         if(pokemon == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No pokemon found.");
         }

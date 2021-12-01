@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/users")
 public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping // ?username=
+    @GetMapping
     @Secured("ROLE_USER")
     public ResponseEntity<List<User>> findAllUsers(@RequestParam(required = false) String username) {
         var users = userService.findAll(username);
@@ -26,7 +26,7 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/{id}") // /api/v1/users/xxxxxxxxxxxx
+    @GetMapping("/{id}")
     @Secured({"ROLE_EDITOR", "ROLE_ADMIN"})
     public ResponseEntity<User> findUserById(@PathVariable String id) {
         return ResponseEntity.ok(userService.findById(id));
@@ -47,7 +47,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @Secured("ROLE_ADMIN")
-    @ResponseStatus(HttpStatus.NO_CONTENT) // 204
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable String id) {
         userService.delete(id);
     }

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 public class PokemonService {
     private static String URL = "https://pokeapi.co/api/v2/pokemon/";
@@ -28,5 +30,13 @@ public class PokemonService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No pokemon found!");
         }
         return pokemon;
+    }
+
+    public List<Pokemon> getAllMyPokemons(){
+        return pokemonRepository.findAll();
+    }
+
+    public Pokemon savePokemon(Pokemon pokemon) {
+        return pokemonRepository.save(pokemon);
     }
 }
